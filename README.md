@@ -70,3 +70,22 @@ individuellement. Les textes joueur sont dans le fichier de traduction.
 donc comme des teamkills de sa part, ce qui peut declencher un autoban
 anti-TK selon les plugins installes. Non corrige : le comportement souhaite
 depend de votre moderation.
+
+## Dependances
+
+Ce plugin depend de **ZoneShilari.Common**, la bibliotheque partagee de la
+collection.
+
+| Fichier | Destination |
+|---|---|
+| `BetterCoinflipsRewritten.dll` | `Plugins/7777/` |
+| `ZoneShilari.Common.dll` | `Plugins/dependencies/` |
+| HintServiceMeow | `Plugins/7777/` |
+
+`ZoneShilari.Common.dll` ne va **jamais** dans `Plugins/7777/` : EXILED
+tenterait de le charger comme plugin. Il doit etre deploye avant ce plugin et
+mis a jour en meme temps.
+
+Pour compiler ce depot isolement, cloner
+[ZoneShilari.Common](https://github.com/Augaton/ZoneShilari.Common) a cote,
+ou passer `-p:CommonProject=chemin/vers/ZoneShilari.Common.csproj`.
