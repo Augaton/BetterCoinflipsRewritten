@@ -1,5 +1,9 @@
 # BetterCoinflipsRewritten 2.0
 
+
+> Portage EXILED 9.14.2 d'un plugin de **Mikihero, Matisiowy**. Depot non affilie a
+> l'auteur d'origine. Voir [NOTICE.md](NOTICE.md) pour l'attribution.
+
 Pile ou face : la piece declenche un effet benefique ou nefaste.
 
 **EXILED 9.14.2** — `dotnet build -c Release BetterCoinflipsRewritten.csproj`
