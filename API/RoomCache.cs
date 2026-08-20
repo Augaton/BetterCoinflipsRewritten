@@ -1,10 +1,10 @@
-using ZoneShilari.Common.Caching;
+using AugatonLib.Caching;
 
 namespace BetterCoinflipsRewritten.API
 {
     public static class RoomCache
     {
-        private static readonly ZoneShilari.Common.Caching.RoomCache Cache = new ZoneShilari.Common.Caching.RoomCache();
+        private static readonly AugatonLib.Caching.RoomCache Cache = new AugatonLib.Caching.RoomCache();
 
         public static int Count => Cache.Count;
 
