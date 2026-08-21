@@ -1,4 +1,6 @@
-﻿using Exiled.API.Features;
+﻿using AugatonLib.Arbitration;
+using BetterCoinflipsRewritten.API;
+using Exiled.API.Features;
 using UnityEngine;
 
 namespace BetterCoinflipsRewritten.Effects.Good
@@ -44,28 +46,16 @@ namespace BetterCoinflipsRewritten.Effects.Good
             bool makeSmall =
                 API.Rng.Next(0, 2) == 0;
 
-            if (makeSmall)
-            {
-                player.Scale = new Vector3(
-                    0.7f,
-                    0.7f,
-                    0.7f);
+            float factor = makeSmall ? 0.7f : 1.1f;
 
-                selectedSize =
-                    Plugin.Instance.Translation
-                        .SmallSizeName;
-            }
-            else
-            {
-                player.Scale = new Vector3(
-                    1.1f,
-                    1.1f,
-                    1.1f);
+            ScaleArbiter.Request(
+                player,
+                Interop.Owner,
+                new Vector3(factor, factor, factor));
 
-                selectedSize =
-                    Plugin.Instance.Translation
-                        .LargeSizeName;
-            }
+            selectedSize = makeSmall
+                ? Plugin.Instance.Translation.SmallSizeName
+                : Plugin.Instance.Translation.LargeSizeName;
         }
     }
 }

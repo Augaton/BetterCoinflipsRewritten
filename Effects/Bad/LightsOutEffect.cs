@@ -1,3 +1,4 @@
+using AugatonLib.Arbitration;
 using BetterCoinflipsRewritten.API;
 using Exiled.API.Features;
 
@@ -47,7 +48,7 @@ namespace BetterCoinflipsRewritten.Effects.Bad
             if (!GlobalCooldown.TryConsume(CooldownKey, cooldown))
                 return;
 
-            Map.TurnOffAllLights(duration);
+            LightArbiter.Blackout(Interop.Owner, duration);
         }
     }
 }
