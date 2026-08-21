@@ -71,7 +71,7 @@ namespace BetterCoinflipsRewritten.Effects.Bad
             player.Position = partner.Position + (Vector3.up * 0.2f);
             partner.Position = origin + (Vector3.up * 0.2f);
 
-            partnerName = partner.Nickname;
+            partnerName = AugatonLib.Text.SafeText.Nickname(partner);
 
             API.HintBridge.Show(
                 partner,
@@ -79,7 +79,7 @@ namespace BetterCoinflipsRewritten.Effects.Bad
                     .PositionSwapPartnerMessage
                     .Replace(
                         "{player}",
-                        player.Nickname),
+                        AugatonLib.Text.SafeText.Nickname(player)),
                 Plugin.Instance.Config.EffectMessageDuration);
         }
 
