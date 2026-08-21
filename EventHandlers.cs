@@ -9,6 +9,7 @@ namespace BetterCoinflipsRewritten
         private readonly Plugin plugin;
         private readonly CoinService coinService;
         private readonly CoinSpawnService coinSpawnService;
+        private readonly CoinConsumeService coinConsumeService;
 
         private CoroutineHandle spawnHandle;
         private bool spawnScheduled;
@@ -16,11 +17,13 @@ namespace BetterCoinflipsRewritten
         public EventHandlers(
             Plugin plugin,
             CoinService coinService,
-            CoinSpawnService coinSpawnService)
+            CoinSpawnService coinSpawnService,
+            CoinConsumeService coinConsumeService)
         {
             this.plugin = plugin;
             this.coinService = coinService;
             this.coinSpawnService = coinSpawnService;
+            this.coinConsumeService = coinConsumeService;
         }
 
         public void OnFlippingCoin(FlippingCoinEventArgs ev)
@@ -77,6 +80,8 @@ namespace BetterCoinflipsRewritten
                     ".");
             }
 
+            coinConsumeService.Schedule(ev.Player, ev.Item);
+
             coinService.ExecuteFlip(
                 ev.Player,
                 ev.IsTails);
@@ -97,6 +102,7 @@ namespace BetterCoinflipsRewritten
             API.HintBridge.Clear();
             API.RoomCache.Rebuild();
             API.GlobalCooldown.Clear();
+            API.Scheduler.Clear();
 
             if (plugin.Config.Debug)
             {
@@ -124,6 +130,7 @@ namespace BetterCoinflipsRewritten
             API.HintBridge.Clear();
             API.RoomCache.Clear();
             API.GlobalCooldown.Clear();
+            API.Scheduler.Clear();
 
             if (plugin.Config.Debug)
             {

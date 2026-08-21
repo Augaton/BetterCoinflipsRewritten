@@ -6,7 +6,7 @@
     <AssemblyName>BetterCoinflipsRewritten</AssemblyName>
     <RootNamespace>BetterCoinflipsRewritten</RootNamespace>
     <UseAugatonLib>true</UseAugatonLib>
-    <Version>2.0.0</Version>
+    <Version>2.1.0</Version>
     <Configurations>Debug;Release</Configurations>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>

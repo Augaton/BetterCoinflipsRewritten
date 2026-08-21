@@ -17,6 +17,12 @@ namespace BetterCoinflipsRewritten
 
         public void SpawnMapCoins()
         {
+            ReplaceLootWithCoins();
+            AddBonusCoins();
+        }
+
+        private void ReplaceLootWithCoins()
+        {
             if (!plugin.Config.SpawnCoinsOnMap)
                 return;
 
@@ -91,6 +97,122 @@ namespace BetterCoinflipsRewritten
                 "/" +
                 requestedAmount +
                 " coins across the map.");
+        }
+
+        private void AddBonusCoins()
+        {
+            if (!plugin.Config.AddBonusCoinsToLoot)
+                return;
+
+            int requestedAmount = plugin.Config.BonusCoinAmount;
+
+            if (requestedAmount <= 0)
+                return;
+
+            List<ItemType> sourceItems =
+                plugin.Config.BonusCoinSourceItems;
+
+            if (sourceItems is null || sourceItems.Count == 0)
+            {
+                Log.Warn(
+                    "[BetterCoinflipsRewritten] bonus_coin_source_items is " +
+                    "empty, no extra coin will be added to the loot pools.");
+
+                return;
+            }
+
+            List<Pickup> anchors = new List<Pickup>(64);
+
+            foreach (Pickup pickup in Pickup.List)
+            {
+                if (pickup is null ||
+                    !pickup.IsSpawned ||
+                    pickup.Type == ItemType.Coin)
+                {
+                    continue;
+                }
+
+                if (!sourceItems.Contains(pickup.Type))
+                    continue;
+
+                anchors.Add(pickup);
+            }
+
+            if (anchors.Count == 0)
+            {
+                Log.Warn(
+                    "[BetterCoinflipsRewritten] No pickup matching " +
+                    "bonus_coin_source_items was found on the map.");
+
+                return;
+            }
+
+            Shuffle(anchors);
+
+            Dictionary<ItemType, int> perType =
+                new Dictionary<ItemType, int>(sourceItems.Count);
+
+            int perTypeLimit = plugin.Config.BonusCoinsPerSourceType;
+            int spawnedCoins = 0;
+
+            foreach (Pickup anchor in anchors)
+            {
+                if (spawnedCoins >= requestedAmount)
+                    break;
+
+                if (anchor is null || !anchor.IsSpawned)
+                    continue;
+
+                perType.TryGetValue(anchor.Type, out int placed);
+
+                if (perTypeLimit > 0 && placed >= perTypeLimit)
+                    continue;
+
+                try
+                {
+                    Pickup.CreateAndSpawn(
+                        ItemType.Coin,
+                        anchor.Position + BonusCoinOffset(),
+                        anchor.Rotation);
+                }
+                catch (Exception exception)
+                {
+                    Log.Error(
+                        "[BetterCoinflipsRewritten] Failed to add a bonus " +
+                        "coin: " +
+                        exception);
+
+                    continue;
+                }
+
+                perType[anchor.Type] = placed + 1;
+                spawnedCoins++;
+
+                if (plugin.Config.Debug)
+                {
+                    Log.Debug(
+                        "[BetterCoinflipsRewritten] Added a coin next to a " +
+                        anchor.Type +
+                        " in room " +
+                        GetRoomName(anchor) +
+                        ".");
+                }
+            }
+
+            Log.Info(
+                "[BetterCoinflipsRewritten] Added " +
+                spawnedCoins +
+                "/" +
+                requestedAmount +
+                " extra coins to the loot pools.");
+        }
+
+        private static Vector3 BonusCoinOffset()
+        {
+            return new Vector3(
+                (API.Rng.NextUnit() - 0.5f) * 0.4f,
+                0.05f,
+                (API.Rng.NextUnit() - 0.5f) * 0.4f);
         }
 
         private bool IsValidReplacement(Pickup pickup)

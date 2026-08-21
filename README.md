@@ -1,4 +1,4 @@
-# BetterCoinflipsRewritten 2.0
+# BetterCoinflipsRewritten 2.1
 
 
 > Portage EXILED 9.14.2 d'un plugin de **Mikihero, Matisiowy**. Depot non affilie a
@@ -8,15 +8,84 @@ Pile ou face : la piece declenche un effet benefique ou nefaste.
 
 **EXILED 9.14.2** — `dotnet build -c Release BetterCoinflipsRewritten.csproj`
 
+## Consommation de la piece
+
+`consume_coin_on_flip` est a **`true`** par defaut : la piece est detruite apres
+le lancer. Un joueur ne peut donc plus rester assis sur une piece a enchainer
+les tirages jusqu'a decrocher le bon effet, ce que le cooldown par joueur ne
+faisait que ralentir.
+
+La destruction est **differee** de `coin_consume_delay` (1,5 s par defaut).
+Retirer l'objet pendant l'event lui-meme casse l'animation client et laisse le
+jeu manipuler un item detruit. Ne pas descendre sous la seconde.
+
+Lacher la piece pendant ce delai ne la sauve pas : si elle n'est plus dans
+l'inventaire, le pickup correspondant est detruit au sol par son numero de
+serie.
+
+Le seul moyen de finir un lancer avec plus de pieces qu'au depart est l'effet
+`double_coin_chance`, volontairement rare.
+
 ## Spawn des pieces
 
-`spawn_coins_on_map` est desormais a **`false`** par defaut. Le remplacement du
-loot appartient a SCP500s, qui place pieces et pilules avec un ratio unique
-(10 % piece, 90 % pilule).
+Deux mecanismes distincts, qui ne font pas la meme chose.
+
+### `add_bonus_coins_to_loot` (nouveau, `true` par defaut)
+
+Ajoute `bonus_coin_amount` pieces **a cote** du loot existant, sans rien
+detruire. C'est la contrepartie de la consommation : les pieces brulent a
+l'usage, il en faut donc davantage sur la carte.
+
+`bonus_coin_source_items` liste les pools de loot qui recoivent une piece en
+plus. `bonus_coins_per_source_type` plafonne le nombre de pieces posees par type
+d'objet, pour ne pas concentrer les dix pieces sur les seuls medkits.
+
+Comme rien n'est detruit, ce mode **cohabite avec SCP500s** : les deux plugins
+ne se disputent aucun pickup.
+
+### `spawn_coins_on_map` (`false` par defaut)
+
+Remplacement pur et simple du loot par des pieces. Le remplacement appartient a
+SCP500s, qui place pieces et pilules avec un ratio unique (10 % piece, 90 %
+pilule).
 
 Ne repasser cette option a `true` que si SCP500s est absent ou si son mode de
 spawn est `SpawnPoints`. Sinon les deux plugins se disputent les memes pickups
 et aucun des deux ratios ne tient.
+
+Les largages de **SupplyDrop** embarquent egalement deux pieces par caisse, MTF
+comme Chaos.
+
+## Effets
+
+Les effets saisonniers d'EXILED (`BecomingFlamingo`, `Prismatic`, `Metal`,
+`SugarRush`) sont **inutilisables** : le jeu ne les applique que pendant
+Halloween, Noel ou le 1er avril. Aucun effet du plugin ne s'appuie dessus,
+sinon un tirage sur trois ne ferait rien onze mois par an.
+
+### Face
+
+Carte d'acces, medkit, teleportation a l'evasion, soin, vie maximale, SCP-268,
+Logicer a une balle, SCP-2176, bonbon rose, changement de taille, bouclier
+temporaire, fantome, montee d'adrenaline, piece dedoublee.
+
+### Pile
+
+Perte de vie, cellules Classe-D, coupure de lumiere, grenade aveuglante, 1 PV,
+inventaire vide, grenade instantanee, teleportation aleatoire, ivresse, trip
+arc-en-ciel, amnesie, projection en l'air, echange de position avec un autre
+joueur, fausse detonation d'ogive, tantrum SCP-173, petrification, lumieres en
+mode discotheque, invasion de souris, annonce C.A.S.S.I.E. moqueuse, fausse
+explosion.
+
+`disco_lights`, `mice_invasion` et `cassie_mock` touchent tout le serveur : ils
+passent par `facility_effect_cooldown`, comme `lights_out`.
+
+`position_swap` deplace un second joueur, qui recoit son propre message. Son
+poids reste bas pour cette raison.
+
+Les annonces de `cassie_mock_lines` sont validees au chargement : une ligne que
+le jeu refuse est signalee dans les logs et n'est jamais jouee.
 
 ## Affichage
 
@@ -34,6 +103,10 @@ Les textes joueur sont integralement en francais dans le fichier de traduction.
 | `log_flips` | `false` | Journalise chaque lancer. Une ecriture disque par lancer |
 | `facility_effect_cooldown` | `60` | Cooldown **serveur** des effets a portee globale |
 | `spawn_coins_on_map` | `false` | Voir ci-dessus |
+| `consume_coin_on_flip` | `true` | Detruit la piece apres le lancer |
+| `coin_consume_delay` | `1.5` | Delai avant destruction, laisse l'animation finir |
+| `add_bonus_coins_to_loot` | `true` | Ajoute des pieces sans detruire de loot |
+| `bonus_coin_amount` | `10` | Nombre de pieces ajoutees |
 
 Les poids de chaque effet et les tunables associes restent configurables
 individuellement. Les textes joueur sont dans le fichier de traduction.
@@ -51,6 +124,13 @@ individuellement. Les textes joueur sont dans le fichier de traduction.
   sont remplaces par une instance partagee. Sur .NET Framework, la graine derive
   du compteur de ticks : deux instances proches peuvent produire la meme suite.
 - La coroutine de spawn est tuee au redemarrage de round et a la desactivation.
+
+## Cycle de vie
+
+Les effets differes (destruction de la piece, retour des lumieres, fin de
+l'ecran noir) passent par `API.Scheduler`, qui garde les handles MEC et les tue
+au `RoundStarted`, au `RestartingRound` et dans `OnDisabled`. Aucune coroutine
+ne survit a un `reload`.
 
 ## Passe de securite
 

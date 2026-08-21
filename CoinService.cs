@@ -83,6 +83,26 @@ namespace BetterCoinflipsRewritten
                     new SizeChangeEffect(),
                     plugin.Config.SizeChangeChance));
 
+            goodEffects.Add(
+                new WeightedEffect(
+                    new AhpShieldEffect(plugin.Config.AhpShieldAmount),
+                    plugin.Config.AhpShieldChance));
+
+            goodEffects.Add(
+                new WeightedEffect(
+                    new GhostlyEffect(plugin.Config.GhostlyDuration),
+                    plugin.Config.GhostlyChance));
+
+            goodEffects.Add(
+                new WeightedEffect(
+                    new SugarRushEffect(plugin.Config.SugarRushDuration),
+                    plugin.Config.SugarRushChance));
+
+            goodEffects.Add(
+                new WeightedEffect(
+                    new DoubleCoinEffect(plugin.Config.MaxInventorySlots),
+                    plugin.Config.DoubleCoinChance));
+
             badEffects.Add(
     new WeightedEffect(
         new HpReductionEffect(
@@ -126,6 +146,74 @@ namespace BetterCoinflipsRewritten
                 new WeightedEffect(
                     new RandomTeleportEffect(),
                     plugin.Config.RandomTeleportChance));
+
+            badEffects.Add(
+                new WeightedEffect(
+                    new DrunkEffect(plugin.Config.DrunkDuration),
+                    plugin.Config.DrunkChance));
+
+            badEffects.Add(
+                new WeightedEffect(
+                    new PrismaticTripEffect(
+                        plugin.Config.PrismaticTripDuration),
+                    plugin.Config.PrismaticTripChance));
+
+            badEffects.Add(
+                new WeightedEffect(
+                    new AmnesiaEffect(plugin.Config.AmnesiaDuration),
+                    plugin.Config.AmnesiaChance));
+
+            badEffects.Add(
+                new WeightedEffect(
+                    new SkyLaunchEffect(plugin.Config.SkyLaunchHeight),
+                    plugin.Config.SkyLaunchChance));
+
+            badEffects.Add(
+                new WeightedEffect(
+                    new PositionSwapEffect(),
+                    plugin.Config.PositionSwapChance));
+
+            badEffects.Add(
+                new WeightedEffect(
+                    new FakeWarheadEffect(
+                        plugin.Config.FakeWarheadDimDuration),
+                    plugin.Config.FakeWarheadChance));
+
+            badEffects.Add(
+                new WeightedEffect(
+                    new TantrumTrapEffect(),
+                    plugin.Config.TantrumTrapChance));
+
+            badEffects.Add(
+                new WeightedEffect(
+                    new PetrifiedEffect(plugin.Config.PetrifiedDuration),
+                    plugin.Config.PetrifiedChance));
+
+            badEffects.Add(
+                new WeightedEffect(
+                    new DiscoLightsEffect(
+                        plugin.Config.DiscoLightsDuration,
+                        plugin.Config.DiscoLightsInterval),
+                    plugin.Config.DiscoLightsChance));
+
+            badEffects.Add(
+                new WeightedEffect(
+                    new MiceInvasionEffect(plugin.Config.MiceInvasionType),
+                    plugin.Config.MiceInvasionChance));
+
+            badEffects.Add(
+                new WeightedEffect(
+                    new CassieMockEffect(
+                        plugin.Config.CassieMockLines,
+                        plugin.Config.CassieMockGlitchChance,
+                        plugin.Config.CassieMockJamChance),
+                    plugin.Config.CassieMockChance));
+
+            badEffects.Add(
+                new WeightedEffect(
+                    new FakeExplosionEffect(
+                        plugin.Config.FakeExplosionStunDuration),
+                    plugin.Config.FakeExplosionChance));
 
             Log.Info(
                 "[BetterCoinflipsRewritten] Registered " +
@@ -285,6 +373,13 @@ namespace BetterCoinflipsRewritten
                     resultLine +
                     "\n" +
                     effectLine;
+
+                if (plugin.Config.ConsumeCoinOnFlip)
+                {
+                    resultMessage +=
+                        "\n" +
+                        plugin.Translation.CoinConsumedLine;
+                }
 
                 API.HintBridge.Show(
                     player,

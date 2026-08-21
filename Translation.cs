@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Exiled.API.Interfaces;
 
 namespace BetterCoinflipsRewritten
@@ -31,6 +31,10 @@ namespace BetterCoinflipsRewritten
         [Description("Ligne d'effet. {effect} est remplace par le message de l'effet selectionne.")]
         public string EffectFormat { get; set; } =
             "<color=white>Effet :</color> {effect}";
+
+        [Description("Ligne ajoutee au resultat quand la piece est consommee par le lancer.")]
+        public string CoinConsumedLine { get; set; } =
+            "<color=#9e9e9e><i>La piece s'est consumee.</i></color>";
 
         [Description("Nom affiche pour face.")]
         public string HeadsName { get; set; } =
@@ -159,5 +163,78 @@ namespace BetterCoinflipsRewritten
         [Description("Message de l'effet de grenade aveuglante.")]
         public string TrollFlashEffectMessage { get; set; } =
             "Une grenade aveuglante est apparue a vos pieds.";
+
+        [Description("Message du bouclier temporaire. {amount} est remplace par les points de bouclier.")]
+        public string AhpShieldEffectMessage { get; set; } =
+            "Un bouclier de {amount} points vous enveloppe.";
+
+        [Description("Message de l'effet fantome. {duration} est remplace par la duree.")]
+        public string GhostlyEffectMessage { get; set; } =
+            "Vous devenez un fantome pendant {duration} secondes.";
+
+        [Description("Message de la montee de sucre. {duration} est remplace par la duree.")]
+        public string SugarRushEffectMessage { get; set; } =
+            "Une montee de sucre vous propulse pendant {duration} secondes.";
+
+        [Description("Message de la piece qui se dedouble.")]
+        public string DoubleCoinEffectMessage { get; set; } =
+            "La piece s'est dedoublee : vous en recuperez deux.";
+
+        [Description("Message de la piece dedoublee lachee au sol faute de place.")]
+        public string DoubleCoinDroppedMessage { get; set; } =
+            "La piece s'est dedoublee, mais votre inventaire etait plein : les deux pieces sont a vos pieds.";
+
+        [Description("Message de l'effet d'ivresse. {duration} est remplace par la duree.")]
+        public string DrunkEffectMessage { get; set; } =
+            "Vous titubez pendant {duration} secondes, comme apres une tournee generale.";
+
+        [Description("Message du trip prismatique. {duration} est remplace par la duree.")]
+        public string PrismaticTripEffectMessage { get; set; } =
+            "Le complexe part en couleurs pendant {duration} secondes.";
+
+        [Description("Message d'amnesie. {duration} est remplace par la duree.")]
+        public string AmnesiaEffectMessage { get; set; } =
+            "Vous ne reconnaissez plus rien pendant {duration} secondes.";
+
+        [Description("Message de projection en l'air. {height} est remplace par la hauteur.")]
+        public string SkyLaunchEffectMessage { get; set; } =
+            "La piece vous a expedie a {height} metres du sol. Bon vol.";
+
+        [Description("Message d'echange de position. {player} est remplace par le nom du partenaire.")]
+        public string PositionSwapEffectMessage { get; set; } =
+            "Vous avez echange de place avec {player}.";
+
+        [Description("Message affiche au joueur echange contre son gre. {player} est remplace par le nom du lanceur.")]
+        public string PositionSwapPartnerMessage { get; set; } =
+            "<b><color=yellow>PILE OU FACE</color></b>\n" +
+            "<color=white>{player} a echange sa place avec la votre.</color>";
+
+        [Description("Message de la fausse detonation d'ogive.")]
+        public string FakeWarheadEffectMessage { get; set; } =
+            "L'ogive vient d'exploser. Enfin, c'est ce que vous avez cru.";
+
+        [Description("Message du piege tantrum.")]
+        public string TantrumTrapEffectMessage { get; set; } =
+            "Le SCP-173 a laisse un souvenir sous vos pieds.";
+
+        [Description("Message de petrification. {duration} est remplace par la duree.")]
+        public string PetrifiedEffectMessage { get; set; } =
+            "Vous etes petrifie pendant {duration} secondes.";
+
+        [Description("Message des lumieres en mode discotheque. {duration} est remplace par la duree.")]
+        public string DiscoLightsEffectMessage { get; set; } =
+            "Le complexe passe en discotheque pendant {duration} secondes.";
+
+        [Description("Message de l'invasion de souris.")]
+        public string MiceInvasionEffectMessage { get; set; } =
+            "Une invasion de souris se declare dans l'abri.";
+
+        [Description("Message de l'annonce moqueuse de C.A.S.S.I.E.")]
+        public string CassieMockEffectMessage { get; set; } =
+            "C.A.S.S.I.E. a un mot a dire sur votre compte.";
+
+        [Description("Message de la fausse explosion.")]
+        public string FakeExplosionEffectMessage { get; set; } =
+            "Une explosion vous a traverse sans une egratignure.";
     }
 }
