@@ -1,3 +1,4 @@
+using System;
 ﻿using AugatonLib.Arbitration;
 using AugatonLib.Bus;
 using BetterCoinflipsRewritten.API;
@@ -31,122 +32,150 @@ namespace BetterCoinflipsRewritten
 
         public void OnFlippingCoin(FlippingCoinEventArgs ev)
         {
-            if (ev == null ||
-                ev.Player == null ||
-                !ev.Player.IsConnected ||
-                !ev.Player.IsAlive)
+            try
             {
-                return;
-            }
+                if (ev == null ||
+                    ev.Player == null ||
+                    !ev.Player.IsConnected ||
+                    !ev.Player.IsAlive)
+                {
+                    return;
+                }
 
-            double secondsRemaining;
+                double secondsRemaining;
 
-            if (coinService.IsOnCooldown(
-                ev.Player,
-                out secondsRemaining))
-            {
-                ev.IsAllowed = false;
-
-                string message =
-                    plugin.Translation.CooldownMessage.Replace(
-                        "{seconds}",
-                        secondsRemaining.ToString("0.0"));
-
-                API.HintBridge.Show(
+                if (coinService.IsOnCooldown(
                     ev.Player,
-                    message,
-                    plugin.Config.CooldownMessageDuration);
+                    out secondsRemaining))
+                {
+                    ev.IsAllowed = false;
+
+                    string message =
+                        plugin.Translation.CooldownMessage.Replace(
+                            "{seconds}",
+                            secondsRemaining.ToString("0.0"));
+
+                    API.HintBridge.Show(
+                        ev.Player,
+                        message,
+                        plugin.Config.CooldownMessageDuration);
+
+                    if (plugin.Config.Debug)
+                    {
+                        Log.Debug(
+                            "[BetterCoinflipsRewritten] " +
+                            ev.Player.Nickname +
+                            " attempted to flip a coin during cooldown. " +
+                            "Remaining: " +
+                            secondsRemaining.ToString("0.0") +
+                            " seconds.");
+                    }
+
+                    return;
+                }
+
+                coinService.SetCooldown(ev.Player);
 
                 if (plugin.Config.Debug)
                 {
                     Log.Debug(
-                        "[BetterCoinflipsRewritten] " +
+                        "[BetterCoinflipsRewritten] Coin flip detected for " +
                         ev.Player.Nickname +
-                        " attempted to flip a coin during cooldown. " +
-                        "Remaining: " +
-                        secondsRemaining.ToString("0.0") +
-                        " seconds.");
+                        ". IsTails: " +
+                        ev.IsTails +
+                        ".");
                 }
 
-                return;
+                coinConsumeService.Schedule(ev.Player, ev.Item);
+
+                coinService.ExecuteFlip(
+                    ev.Player,
+                    ev.IsTails);
+
+                PluginBus.Publish(
+                    BusTopics.CoinFlipped,
+                    Interop.Owner,
+                    ev.Player);
             }
-
-            coinService.SetCooldown(ev.Player);
-
-            if (plugin.Config.Debug)
+            catch (Exception e)
             {
-                Log.Debug(
-                    "[BetterCoinflipsRewritten] Coin flip detected for " +
-                    ev.Player.Nickname +
-                    ". IsTails: " +
-                    ev.IsTails +
-                    ".");
+                Log.Error($"OnFlippingCoin: {e}");
             }
-
-            coinConsumeService.Schedule(ev.Player, ev.Item);
-
-            coinService.ExecuteFlip(
-                ev.Player,
-                ev.IsTails);
-
-            PluginBus.Publish(
-                BusTopics.CoinFlipped,
-                Interop.Owner,
-                ev.Player);
         }
 
         public void OnLeft(LeftEventArgs ev)
         {
-            if (ev == null || ev.Player == null)
-                return;
+            try
+            {
+                if (ev == null || ev.Player == null)
+                    return;
 
-            coinService.RemovePlayer(ev.Player);
-            API.HintBridge.Remove(ev.Player);
-            ScaleArbiter.Forget(ev.Player);
+                coinService.RemovePlayer(ev.Player);
+                API.HintBridge.Remove(ev.Player);
+                ScaleArbiter.Forget(ev.Player);
+            }
+            catch (Exception e)
+            {
+                Log.Error($"OnLeft: {e}");
+            }
         }
 
         public void OnRoundStarted()
         {
-            coinService.Clear();
-            API.HintBridge.Clear();
-            API.RoomCache.Rebuild();
-            ReleaseArbiters();
-            API.GlobalCooldown.Clear();
-            API.Scheduler.Clear();
-
-            if (plugin.Config.Debug)
+            try
             {
-                Log.Debug(
-                    "[BetterCoinflipsRewritten] Round started. " +
-                    "Player data has been cleared.");
-            }
+                coinService.Clear();
+                API.HintBridge.Clear();
+                API.RoomCache.Rebuild();
+                ReleaseArbiters();
+                API.GlobalCooldown.Clear();
+                API.Scheduler.Clear();
 
-            KillPendingSpawn();
-
-            spawnScheduled = true;
-            spawnHandle = Timing.CallDelayed(
-                plugin.Config.CoinSpawnDelay,
-                delegate
+                if (plugin.Config.Debug)
                 {
-                    spawnScheduled = false;
-                    coinSpawnService.SpawnMapCoins();
-                });
+                    Log.Debug(
+                        "[BetterCoinflipsRewritten] Round started. " +
+                        "Player data has been cleared.");
+                }
+
+                KillPendingSpawn();
+
+                spawnScheduled = true;
+                spawnHandle = Timing.CallDelayed(
+                    plugin.Config.CoinSpawnDelay,
+                    delegate
+                    {
+                        spawnScheduled = false;
+                        coinSpawnService.SpawnMapCoins();
+                    });
+            }
+            catch (Exception e)
+            {
+                Log.Error($"OnRoundStarted: {e}");
+            }
         }
 
         public void OnRestartingRound()
         {
-            KillPendingSpawn();
-            coinService.Clear();
-            API.HintBridge.Clear();
-            API.RoomCache.Clear();
-            ReleaseArbiters();
-            API.GlobalCooldown.Clear();
-            API.Scheduler.Clear();
-
-            if (plugin.Config.Debug)
+            try
             {
-                Log.Debug(
-                    "[BetterCoinflipsRewritten] Round is restarting.");
+                KillPendingSpawn();
+                coinService.Clear();
+                API.HintBridge.Clear();
+                API.RoomCache.Clear();
+                ReleaseArbiters();
+                API.GlobalCooldown.Clear();
+                API.Scheduler.Clear();
+
+                if (plugin.Config.Debug)
+                {
+                    Log.Debug(
+                        "[BetterCoinflipsRewritten] Round is restarting.");
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error($"OnRestartingRound: {e}");
             }
         }
         public static void ReleaseArbiters()
