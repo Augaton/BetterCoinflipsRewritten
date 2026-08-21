@@ -1,4 +1,5 @@
 ﻿using System;
+using AugatonLib.Runtime;
 using Exiled.API.Features;
 
 using PlayerEvents = Exiled.Events.Handlers.Player;
@@ -67,6 +68,13 @@ namespace BetterCoinflipsRewritten
 
             ServerEvents.RoundStarted += eventHandlers.OnRoundStarted;
             ServerEvents.RestartingRound += eventHandlers.OnRestartingRound;
+
+            PluginDirectory.Register(
+                this,
+                Capability.Hints,
+                Capability.Scale,
+                Capability.Light,
+                Capability.Bus);
 
             Log.Info("==============================================");
             Log.Info("[BetterCoinflipsRewritten] Plugin loaded.");
@@ -191,6 +199,9 @@ namespace BetterCoinflipsRewritten
             API.Scheduler.Clear();
             API.GlobalCooldown.Clear();
             API.RoomCache.Clear();
+
+            EventHandlers.ReleaseArbiters();
+            PluginDirectory.Unregister(this);
 
             eventHandlers = null;
             coinService = null;

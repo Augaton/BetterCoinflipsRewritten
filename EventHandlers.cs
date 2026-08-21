@@ -1,4 +1,7 @@
-﻿using Exiled.API.Features;
+﻿using AugatonLib.Arbitration;
+using AugatonLib.Bus;
+using BetterCoinflipsRewritten.API;
+using Exiled.API.Features;
 using Exiled.Events.EventArgs.Player;
 using MEC;
 
@@ -85,6 +88,11 @@ namespace BetterCoinflipsRewritten
             coinService.ExecuteFlip(
                 ev.Player,
                 ev.IsTails);
+
+            PluginBus.Publish(
+                BusTopics.CoinFlipped,
+                Interop.Owner,
+                ev.Player);
         }
 
         public void OnLeft(LeftEventArgs ev)
@@ -94,6 +102,7 @@ namespace BetterCoinflipsRewritten
 
             coinService.RemovePlayer(ev.Player);
             API.HintBridge.Remove(ev.Player);
+            ScaleArbiter.Forget(ev.Player);
         }
 
         public void OnRoundStarted()
@@ -101,6 +110,7 @@ namespace BetterCoinflipsRewritten
             coinService.Clear();
             API.HintBridge.Clear();
             API.RoomCache.Rebuild();
+            ReleaseArbiters();
             API.GlobalCooldown.Clear();
             API.Scheduler.Clear();
 
@@ -129,6 +139,7 @@ namespace BetterCoinflipsRewritten
             coinService.Clear();
             API.HintBridge.Clear();
             API.RoomCache.Clear();
+            ReleaseArbiters();
             API.GlobalCooldown.Clear();
             API.Scheduler.Clear();
 
@@ -138,6 +149,12 @@ namespace BetterCoinflipsRewritten
                     "[BetterCoinflipsRewritten] Round is restarting.");
             }
         }
+        public static void ReleaseArbiters()
+        {
+            ScaleArbiter.ReleaseOwner(Interop.Owner);
+            LightArbiter.ReleaseOwner(Interop.Owner);
+        }
+
         public void KillPendingSpawn()
         {
             if (!spawnScheduled)

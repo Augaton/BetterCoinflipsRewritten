@@ -1,3 +1,4 @@
+using AugatonLib.Arbitration;
 using BetterCoinflipsRewritten.API;
 using Exiled.API.Features;
 using UnityEngine;
@@ -57,12 +58,12 @@ namespace BetterCoinflipsRewritten.Effects.Bad
             {
                 Scheduler.Delay(
                     interval * i,
-                    delegate { Map.ChangeLightsColor(NextColor()); });
+                    delegate { LightArbiter.Tint(Interop.Owner, NextColor()); });
             }
 
             Scheduler.Delay(
                 duration,
-                delegate { Map.ResetLightsColor(); });
+                delegate { LightArbiter.ReleaseTint(Interop.Owner); });
         }
 
         private static Color NextColor()
