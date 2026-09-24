@@ -1,5 +1,5 @@
 using System;
-﻿using AugatonLib.Arbitration;
+using AugatonLib.Arbitration;
 using AugatonLib.Bus;
 using BetterCoinflipsRewritten.API;
 using Exiled.API.Features;
@@ -146,7 +146,15 @@ namespace BetterCoinflipsRewritten
                     delegate
                     {
                         spawnScheduled = false;
-                        coinSpawnService.SpawnMapCoins();
+
+                        try
+                        {
+                            coinSpawnService.SpawnMapCoins();
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error($"SpawnMapCoins: {e}");
+                        }
                     });
             }
             catch (Exception e)

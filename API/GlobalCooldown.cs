@@ -6,6 +6,15 @@ namespace BetterCoinflipsRewritten.API
     {
         private static readonly Dictionary<string, float> LastUse = new Dictionary<string, float>();
 
+        public static bool IsReady(string key, float durationSeconds)
+        {
+            if (durationSeconds <= 0f)
+                return true;
+
+            return !LastUse.TryGetValue(key, out float last) ||
+                   UnityEngine.Time.realtimeSinceStartup - last >= durationSeconds;
+        }
+
         public static bool TryConsume(string key, float durationSeconds)
         {
             if (durationSeconds <= 0f)

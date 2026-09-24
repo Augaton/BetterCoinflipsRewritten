@@ -10,6 +10,7 @@ namespace BetterCoinflipsRewritten.Effects.Bad
         private const string CooldownKey = "cassie";
 
         private readonly List<string> lines;
+        private readonly List<string> pendingLines;
         private readonly float glitchChance;
         private readonly float jamChance;
 
@@ -22,6 +23,7 @@ namespace BetterCoinflipsRewritten.Effects.Bad
             this.jamChance = jamChance;
 
             lines = new List<string>(4);
+            pendingLines = new List<string>(4);
 
             if (announcements is null)
                 return;
@@ -31,18 +33,7 @@ namespace BetterCoinflipsRewritten.Effects.Bad
                 if (string.IsNullOrEmpty(line))
                     continue;
 
-                if (!ExiledCassie.IsValid(line))
-                {
-                    Log.Warn(
-                        "[BetterCoinflipsRewritten] C.A.S.S.I.E. announcement " +
-                        "refused by the game, it will never be played: \"" +
-                        line +
-                        "\".");
-
-                    continue;
-                }
-
-                lines.Add(line);
+                pendingLines.Add(line);
             }
         }
 
@@ -65,7 +56,10 @@ namespace BetterCoinflipsRewritten.Effects.Bad
             return player is not null &&
                    player.IsConnected &&
                    player.IsAlive &&
-                   lines.Count > 0;
+                   GlobalCooldown.IsReady(
+                       CooldownKey,
+                       Plugin.Instance.Config.FacilityEffectCooldown) &&
+                   HasPlayableLine();
         }
 
         public void Execute(Player player)
@@ -79,6 +73,37 @@ namespace BetterCoinflipsRewritten.Effects.Bad
             string line = lines[Rng.Next(0, lines.Count)];
 
             ExiledCassie.GlitchyMessage(line, glitchChance, jamChance);
+        }
+
+        private bool HasPlayableLine()
+        {
+            if (pendingLines.Count > 0 &&
+                global::Cassie.CassieTtsAnnouncer.TryGetDatabase(out _))
+            {
+                ValidatePendingLines();
+            }
+
+            return lines.Count > 0;
+        }
+
+        private void ValidatePendingLines()
+        {
+            foreach (string line in pendingLines)
+            {
+                if (ExiledCassie.CalculateDuration(line) > 0f)
+                {
+                    lines.Add(line);
+                    continue;
+                }
+
+                Log.Warn(
+                    "[BetterCoinflipsRewritten] C.A.S.S.I.E. announcement " +
+                    "refused by the game, it will never be played: \"" +
+                    line +
+                    "\".");
+            }
+
+            pendingLines.Clear();
         }
     }
 }

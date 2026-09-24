@@ -24,6 +24,7 @@ namespace BetterCoinflipsRewritten.Effects.Bad
             return player != null &&
                    player.IsConnected &&
                    player.IsAlive &&
+                   !Map.IsLczDecontaminated &&
                    Room.Get(RoomType.LczClassDSpawn) != null;
         }
 

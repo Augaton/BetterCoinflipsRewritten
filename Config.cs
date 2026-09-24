@@ -214,7 +214,7 @@ namespace BetterCoinflipsRewritten
         [Description("Weight of the mocking C.A.S.S.I.E. announcement effect. Facility-wide, so it goes through facility_effect_cooldown.")]
         public int CassieMockChance { get; set; } = 8;
 
-        [Description("Announcements the mocking C.A.S.S.I.E. effect can play. A line the game refuses is reported at startup and never played.")]
+        [Description("Announcements the mocking C.A.S.S.I.E. effect can play. A line the game refuses is reported in the server log on the first coin flip of the session and never played.")]
         public List<string> CassieMockLines { get; set; } = new List<string>
         {
             "ATTENTION ALL PERSONNEL . AN UNKNOWN OBJECT HAS BEEN DETECTED IN LIGHT CONTAINMENT ZONE",

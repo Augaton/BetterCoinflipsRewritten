@@ -9,33 +9,15 @@ namespace BetterCoinflipsRewritten
 {
     public sealed class Plugin : Plugin<Config, Translation>
     {
-        public override string Name
-        {
-            get { return "BetterCoinflipsRewritten"; }
-        }
+        public override string Name => "BetterCoinflipsRewritten";
 
-        public override string Author
-        {
-            get
-            {
-                return "Matisiowy, original plugin written by Mikihero";
-            }
-        }
+        public override string Author => "Matisiowy, original plugin written by Mikihero";
 
-        public override Version Version
-        {
-            get { return new Version(2, 1, 0); }
-        }
+        public override string Prefix => "bettercoinflips";
 
-        public override Version RequiredExiledVersion
-        {
-            get { return new Version(9, 14, 2); }
-        }
+        public override Version Version => new Version(2, 1, 0);
 
-        public override string Prefix
-        {
-            get { return "bettercoinflips"; }
-        }
+        public override Version RequiredExiledVersion => new Version(9, 14, 2);
 
         public static Plugin Instance { get; private set; }
 
@@ -69,6 +51,11 @@ namespace BetterCoinflipsRewritten
             ServerEvents.RoundStarted += eventHandlers.OnRoundStarted;
             ServerEvents.RestartingRound += eventHandlers.OnRestartingRound;
 
+            if (Exiled.API.Features.Round.IsStarted)
+                API.RoomCache.Rebuild();
+
+            ServerEvents.ReloadedConfigs += OnReloadedConfigs;
+
             PluginDirectory.Register(
                 this,
                 Capability.Hints,
@@ -76,17 +63,7 @@ namespace BetterCoinflipsRewritten
                 Capability.Light,
                 Capability.Bus);
 
-            Log.Info("==============================================");
-            Log.Info("[BetterCoinflipsRewritten] Plugin loaded.");
-            Log.Info(
-                "[BetterCoinflipsRewritten] Coins on map: " +
-                Config.MapCoinAmount +
-                ", extra coins in loot pools: " +
-                (Config.AddBonusCoinsToLoot ? Config.BonusCoinAmount : 0));
-            Log.Info(
-                "[BetterCoinflipsRewritten] Coin consumed on flip: " +
-                Config.ConsumeCoinOnFlip);
-            Log.Info("==============================================");
+            Log.Info($"[BetterCoinflipsRewritten] Coins on map: {Config.MapCoinAmount}, extra coins in loot pools: {(Config.AddBonusCoinsToLoot ? Config.BonusCoinAmount : 0)}, coin consumed on flip: {Config.ConsumeCoinOnFlip}.");
 
             base.OnEnabled();
         }
@@ -129,6 +106,12 @@ namespace BetterCoinflipsRewritten
                 0f,
                 1f);
 
+            Config.MaxInventorySlots = (int)Clamp(
+                "max_inventory_slots",
+                Config.MaxInventorySlots,
+                0f,
+                InventorySystem.Inventory.MaxSlots);
+
             if (Config.AddBonusCoinsToLoot &&
                 (Config.BonusCoinSourceItems is null ||
                  Config.BonusCoinSourceItems.Count == 0))
@@ -140,6 +123,14 @@ namespace BetterCoinflipsRewritten
 
             if (!Config.ConsumeCoinOnFlip)
                 return;
+
+            if (Config.CoinCooldown <= Config.CoinConsumeDelay)
+            {
+                Log.Warn(
+                    "[BetterCoinflipsRewritten] coin_cooldown is not longer " +
+                    "than coin_consume_delay, the same coin can be flipped " +
+                    "again before it is destroyed.");
+            }
 
             if (Config.AddBonusCoinsToLoot || Config.SpawnCoinsOnMap)
                 return;
@@ -179,21 +170,18 @@ namespace BetterCoinflipsRewritten
 
         public override void OnDisabled()
         {
-            if (eventHandlers != null)
+            if (eventHandlers is not null)
             {
                 PlayerEvents.FlippingCoin -= eventHandlers.OnFlippingCoin;
                 PlayerEvents.Left -= eventHandlers.OnLeft;
 
                 ServerEvents.RoundStarted -= eventHandlers.OnRoundStarted;
-                ServerEvents.RestartingRound -=
-                    eventHandlers.OnRestartingRound;
+                ServerEvents.RestartingRound -= eventHandlers.OnRestartingRound;
+
+                eventHandlers.KillPendingSpawn();
             }
 
-            if (eventHandlers != null)
-                eventHandlers.KillPendingSpawn();
-
-            if (coinService != null)
-                coinService.Clear();
+            coinService?.Clear();
 
             API.HintBridge.Clear();
             API.Scheduler.Clear();
@@ -201,6 +189,7 @@ namespace BetterCoinflipsRewritten
             API.RoomCache.Clear();
 
             EventHandlers.ReleaseArbiters();
+            ServerEvents.ReloadedConfigs -= OnReloadedConfigs;
             PluginDirectory.Unregister(this);
 
             eventHandlers = null;
@@ -209,10 +198,19 @@ namespace BetterCoinflipsRewritten
             coinConsumeService = null;
             Instance = null;
 
-            Log.Info(
-                "[BetterCoinflipsRewritten] Plugin disabled.");
-
             base.OnDisabled();
+        }
+
+        private void OnReloadedConfigs()
+        {
+            try
+            {
+                ValidateConfig();
+            }
+            catch (Exception e)
+            {
+                Log.Error($"OnReloadedConfigs: {e}");
+            }
         }
     }
 }

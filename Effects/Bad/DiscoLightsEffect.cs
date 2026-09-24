@@ -41,7 +41,10 @@ namespace BetterCoinflipsRewritten.Effects.Bad
                    player.IsConnected &&
                    player.IsAlive &&
                    duration > 0f &&
-                   interval > 0f;
+                   interval > 0f &&
+                   GlobalCooldown.IsReady(
+                       CooldownKey,
+                       Plugin.Instance.Config.FacilityEffectCooldown);
         }
 
         public void Execute(Player player)

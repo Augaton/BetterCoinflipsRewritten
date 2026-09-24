@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Exiled.API.Enums;
 using Exiled.API.Features;
 using UnityEngine;
 
@@ -37,7 +38,8 @@ namespace BetterCoinflipsRewritten.Effects.Bad
         {
             if (player is null ||
                 !player.IsConnected ||
-                !player.IsAlive)
+                !player.IsAlive ||
+                IsInDecontaminatedLcz(player))
             {
                 return false;
             }
@@ -116,8 +118,16 @@ namespace BetterCoinflipsRewritten.Effects.Bad
             return other is not null &&
                    other.IsConnected &&
                    other.IsAlive &&
+                   !other.IsNPC &&
                    !other.IsScp &&
+                   !IsInDecontaminatedLcz(other) &&
                    other != player;
+        }
+
+        private static bool IsInDecontaminatedLcz(Player player)
+        {
+            return Map.IsLczDecontaminated &&
+                   player.Zone == ZoneType.LightContainment;
         }
     }
 }

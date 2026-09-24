@@ -84,8 +84,13 @@ passent par `facility_effect_cooldown`, comme `lights_out`.
 `position_swap` deplace un second joueur, qui recoit son propre message. Son
 poids reste bas pour cette raison.
 
-Les annonces de `cassie_mock_lines` sont validees au chargement : une ligne que
-le jeu refuse est signalee dans les logs et n'est jamais jouee.
+Une fois la LCZ decontaminee, aucun effet n'y envoie plus personne : la
+teleportation aleatoire choisit une autre zone, et `tp_to_class_d_cells` comme
+`position_swap` sortent du tirage quand ils n'ont plus de destination sure.
+
+Les annonces de `cassie_mock_lines` sont validees au premier lancer de la
+session, une fois la base C.A.S.S.I.E. chargee par le jeu : une ligne refusee
+est signalee dans les logs et n'est jamais jouee.
 
 ## Affichage
 

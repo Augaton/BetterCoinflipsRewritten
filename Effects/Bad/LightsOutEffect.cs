@@ -1,5 +1,6 @@
 using AugatonLib.Arbitration;
 using BetterCoinflipsRewritten.API;
+using Exiled.API.Enums;
 using Exiled.API.Features;
 
 namespace BetterCoinflipsRewritten.Effects.Bad
@@ -37,7 +38,11 @@ namespace BetterCoinflipsRewritten.Effects.Bad
             return player != null &&
                    player.IsConnected &&
                    player.IsAlive &&
-                   duration > 0f;
+                   duration > 0f &&
+                   !IsAnyZoneBlackedOut() &&
+                   GlobalCooldown.IsReady(
+                       CooldownKey,
+                       Plugin.Instance.Config.FacilityEffectCooldown);
         }
 
         public void Execute(Player player)
@@ -49,6 +54,17 @@ namespace BetterCoinflipsRewritten.Effects.Bad
                 return;
 
             LightArbiter.Blackout(Interop.Owner, duration);
+        }
+
+        private static bool IsAnyZoneBlackedOut()
+        {
+            foreach (ZoneType zone in LightArbiter.AllZones)
+            {
+                if (LightArbiter.IsBlackedOut(zone))
+                    return true;
+            }
+
+            return false;
         }
     }
 }

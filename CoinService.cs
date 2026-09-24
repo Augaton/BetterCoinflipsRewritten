@@ -221,11 +221,38 @@ namespace BetterCoinflipsRewritten
                 " positive effects and " +
                 badEffects.Count +
                 " negative effects.");
+
+            if (TotalWeight(goodEffects) <= 0)
+            {
+                Log.Warn(
+                    "[BetterCoinflipsRewritten] Every positive effect has a " +
+                    "weight of 0, heads will never trigger an effect.");
+            }
+
+            if (TotalWeight(badEffects) <= 0)
+            {
+                Log.Warn(
+                    "[BetterCoinflipsRewritten] Every negative effect has a " +
+                    "weight of 0, tails will never trigger an effect.");
+            }
         }
 
-            public bool IsOnCooldown(
-            Player player,
-            out double secondsRemaining)
+        private static int TotalWeight(List<WeightedEffect> effects)
+        {
+            int total = 0;
+
+            foreach (WeightedEffect weightedEffect in effects)
+            {
+                if (weightedEffect.Weight > 0)
+                    total += weightedEffect.Weight;
+            }
+
+            return total;
+        }
+
+        public bool IsOnCooldown(
+        Player player,
+        out double secondsRemaining)
         {
             secondsRemaining = 0;
 
